@@ -22,13 +22,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import urllib3
 from datetime import datetime
-# 尝试导入青龙通知模块
-try:
-    import notify
-    HAS_NOTIFY = True
-except ImportError:
-    HAS_NOTIFY = False
-   # ========== 配置常量 ==========
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SIGN_BASE = 'https://integralapi.kuwo.cn/api/v1/online/sign'
@@ -1382,42 +1376,38 @@ if __name__ == '__main__':
             print(f'   账号{acc_phone}: +{acc_gold}')
     print('============================================================')
     
-    # 仅在12点推送统计结果
-    if should_push() and account_gold_stats:
-        print('\n📤 正在推送金币统计到PushPlus...')
-        now = datetime.now()
-        title = f'酷我音乐金币统计 {now.strftime("%Y-%m-%d")}'
-        
-        content_lines = [f'📅 统计时间: {now.strftime("%Y-%m-%d %H:%M")}', '']
-        total_all_gold = 0
-        total_earned_all = 0
-        
-        # 获取当天累计金币数据
-        daily_data = get_daily_gold_data()
-        
-        for idx, stat in enumerate(account_gold_stats, 1):
-            content_lines.append(f'📱 账号{idx} ({stat["phone"]}):')
-            if 'error' in stat:
-                content_lines.append(f'   ❌ {stat["error"]}')
-            else:
-                content_lines.append(f'   起始金币: {stat["start_gold"]}')
-                content_lines.append(f'   当前金币: {stat["end_gold"]}')
-                content_lines.append(f'   本次获得: +{stat["earned"]}')
-                # 显示该账号当天累计
-                acc_today = daily_data.get('accounts', {}).get(stat["phone"], 0)
-                if acc_today > 0:
-                    content_lines.append(f'   当天累计: +{acc_today}')
-            total_all_gold += stat.get('end_gold', 0)
-            total_earned_all += stat.get('earned', 0)
-            content_lines.append('')
-        
-        content_lines.append('=' * 30)
-        content_lines.append(f'💰 全部账号金币总计: {total_all_gold}')
-        content_lines.append(f'📈 全部账号本次获得: +{total_earned_all}')
-        
-        # 添加当天累计金币统计
-        if daily_data['total_gold'] > 0:
-            content_lines.append(f'🌟 当天累计获得: +{daily_data["total_gold"]}')
-        
-        content = '\n'.join(content_lines)
-        push_plus_send(title, content)
+     # ----------替换原来的should_push、push_plus_send调用----------
+    # 组装推送内容
+    now = datetime.now()
+    title = f'酷我音乐金币统计 {now.strftime("%Y-%m-%d")}'
+    content_lines = [f'📅 统计时间: {now.strftime("%Y-%m-%d %H:%M")}', '']
+    total_all_gold = 0
+    total_earned_all = 0
+    daily_data = get_daily_gold_data()
+    for idx, stat in enumerate(account_gold_stats, 1):
+        content_lines.append(f'📱 账号{idx} ({stat["phone"]}):')
+        if 'error' in stat:
+            content_lines.append(f'   ❌ {stat["error"]}')
+        else:
+            content_lines.append(f'   起始金币: {stat["start_gold"]}')
+            content_lines.append(f'   当前金币: {stat["end_gold"]}')
+            content_lines.append(f'   本次获得: +{stat["earned"]}')
+            acc_today = daily_data.get('accounts', {}).get(stat["phone"], 0)
+            if acc_today > 0:
+                content_lines.append(f'   当天累计: +{acc_today}')
+        total_all_gold += stat.get('end_gold', 0)
+        total_earned_all += stat.get('earned', 0)
+        content_lines.append('')
+    content_lines.append('=' * 30)
+    content_lines.append(f'💰 全部账号金币总计: {total_all_gold}')
+    content_lines.append(f'📈 全部账号本次获得: +{total_earned_all}')
+    if daily_data['total_gold'] > 0:
+        content_lines.append(f'🌟 当天累计获得: +{daily_data["total_gold"]}')
+    content = '\n'.join(content_lines)
+
+    # 调用青龙自带通知模块notify，复用面板通知设置
+    if HAS_NOTIFY:
+        notify.notify(title, content)
+        print("✅ 已调用青龙notify模块发送通知")
+    else:
+        print("⚠️ notify模块导入失败，无法发送青龙通知")
