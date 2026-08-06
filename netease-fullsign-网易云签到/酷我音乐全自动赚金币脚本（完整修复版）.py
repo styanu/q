@@ -1,3 +1,10 @@
+酷我音乐全自动赚金币脚本（完整修复版）
+使用说明
+1. 环境变量使用 KWYY
+2. 单账号格式: 手机号#密码
+3. 备注格式: 备注#手机号#密码
+4. 多账号用 & 分隔: KWYY="备注#手机号1#密码1&备注2#手机号2#密码2"
+5. 可选变量：PUSH_PLUS_TOKEN、FORCE_PUSH=1、KUWO_FREEMIUM_LOOP
 
 import os
 import base64
