@@ -22,7 +22,13 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import urllib3
 from datetime import datetime
-
+# 尝试导入青龙通知模块
+try:
+    import notify
+    HAS_NOTIFY = True
+except ImportError:
+    HAS_NOTIFY = False
+   # ========== 配置常量 ==========
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SIGN_BASE = 'https://integralapi.kuwo.cn/api/v1/online/sign'
