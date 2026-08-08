@@ -530,9 +530,18 @@ if __name__ == "__main__":
             load_token = json.load(f)
     except:
         load_token = {}
+
+    #打印调试信息
+    productNo_lists = os.environ.get('yzf') or productNo_list
+    print(f"【DEBUG】yzf原始值：{repr(productNo_lists)}")
+    acc_list = productNo_lists.split('&')
+    print(f"【DEBUG】解析账号列表：{acc_list}")
+
     # 配置事件循环策略（Windows需要）
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+    # linux容器不需要
+    asyncio.run(main())
     # linux容器不需要
     asyncio.run(main())
