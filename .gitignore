@@ -1,8 +1,0 @@
-node_modules/
-package*.json
-.gitignore
-.codex
-.czrc
-Tools/
-wxapp/*_token_cache.json
-daily/*_token_cache.json
